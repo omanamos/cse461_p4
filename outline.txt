@@ -1,2 +1,23 @@
 
+TODO: deal with non-unique nicknames / spoofing
+
+TODO: every time you hear a GDAY, spoof the GBYE
+      set it up so that attack doesn't break ours
+      spoof as them
+
+Object takes a multicast address and nickname for its ctor param
+- We need a hashtable from nickname -> source IP, port, timestamp
+    populated when a GDAY message is received
+
+- Doesn't say what multicast address. Doesn't say what port. 
+   -> Specify at command line
+
+- One thread waiting for GDAY/GBYE messages
+- One thread sending GDAY messages periodically 
+
+- One thread waiting for user input
+   Scanner. Whenever \n is seen, handle timeouts/retransmissions/ACKS, then go
+   back to scanner loop
+- One thread waiting for SAY messages from other users
+   -> simplest of all. Receive, send ACK, parse, -> stdout
 
