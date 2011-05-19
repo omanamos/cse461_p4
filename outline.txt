@@ -4,6 +4,9 @@ TODO: deal with non-unique nicknames / spoofing
 TODO: every time you hear a GDAY, spoof the GBYE
       set it up so that attack doesn't break ours
       spoof as them
+      
+TODO: should the receiver display messages from 
+      hosts not currently in the group
 
 Object takes a multicast address and nickname for its ctor param
 - We need a hashtable from nickname -> source IP, port, timestamp
