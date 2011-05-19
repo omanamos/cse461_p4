@@ -1,10 +1,10 @@
 public enum Packet {
-    YEAH,
-    SAYS,
+    YEAH,   // XXX confusing that Packet.YEAH and Packet.Yeah look so similar...
+    SAYS,   // maybe just give in and separate them out into their own files..
     GDAY,
     GBYE;
     
-    public static Packet parseFromBytes(byte[] payload) {
+    public static Packet getType(byte[] payload) {
         String[] delimitedContents = payload.toString().split(" ");
         if(delimitedContents.length == 0)
             return null;
@@ -29,6 +29,14 @@ public enum Packet {
         
         public Yeah(int sequenceNumber) {
             this.sequenceNumber = sequenceNumber;
+        }
+        
+        public Yeah(byte[] payload) {
+            String[] delimitedContents = payload.toString().split(" ");
+            if(delimitedContents.length != 2 || !delimitedContents[0].equals("YEAH"))
+                throw new IllegalArgumentException("Could not parse payload as YEAH packet");
+            
+            this.sequenceNumber = Integer.parseInt(delimitedContents[1]);
         }
         
         public byte[] toBytes() {
@@ -61,6 +69,16 @@ public enum Packet {
             this.nickname = nickname;
             this.sequenceNumber = sequenceNumber;
             this.message = message;
+        }
+        
+        public Says(byte[] payload) {
+            String[] delimitedContents = payload.toString().split(" ");
+            if(delimitedContents.length != 4 || !delimitedContents[0].equals("SAYS"))
+                throw new IllegalArgumentException("Could not parse payload as Says packet");
+            
+            this.nickname = delimitedContents[1];
+            this.sequenceNumber = Integer.parseInt(delimitedContents[2]);
+            this.message = delimitedContents[3];
         }
         
         public byte[] toBytes() {

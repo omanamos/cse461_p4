@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
 
+import Receiver.UDPListenerThread;
+
 public class MulticastListenerThread extends UDPListenerThread{
 
 	private MembershipManager manager;
