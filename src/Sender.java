@@ -1,8 +1,8 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Sender {
     private static final int SOCKET_TIMEOUT_MILLIS = 10000;
@@ -20,7 +20,7 @@ public class Sender {
 		nextSequenceNumber = 0;
 		
 		// TODO: spawn new thread that listens on STDIN
-		new KeyboardListener();
+		new KeyboardListener().run();
 	}
 	
 	public class KeyboardListener extends Thread {

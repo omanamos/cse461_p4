@@ -1,26 +1,80 @@
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MembershipManager{
 	
     private ConcurrentHashMap<String, Peer> peers = new ConcurrentHashMap<String, Peer>();
-	private final String mulitcastAddr;
+	private boolean running;
+
+	private final MulticastSocket socket;
+	private final String addr;
+	private final String nickname;
 	
 	public MembershipManager(String multicastAddr, MulticastSocket socket, String nickname){
-		this.mulitcastAddr = multicastAddr;
+		this.addr = multicastAddr;
+		this.socket = socket;
+		this.nickname = nickname;
+		new GDayThread().run();
 	}
 	
 	public String getMulitcastAddr() {
-		return mulitcastAddr;
+		return addr;
 	}
 	
-	public Collection<Peer> getAllPeer() {
+	public Collection<Peer> getAllPeers() {
+		long curEpoch = System.currentTimeMillis();
+		Set<String> toRemove = new HashSet<String>();
+		
+		for(String nickname : this.peers.keySet())
+			if(!nickname.equals(this.nickname) && this.peers.get(nickname).isExpired(curEpoch))
+				toRemove.add(nickname);
+		
+		for(String nickname : toRemove)
+			this.peers.remove(nickname);
+		
 	    return Collections.unmodifiableCollection(this.peers.values());
 	}
 	
+	public Peer getPeer(String nickname){
+		return this.peers.get(nickname);
+	}
+	
 	public void receivedGday(Packet.GDay packet){
-		this.peers.get(packet.nickname).receivedGday();
+		this.peers.get(packet.nickname).receivedGDay();
+	}
+	
+	public void recievedGbye(Packet.GBye packet){
+		this.peers.remove(packet.nickname);
+	}
+	
+	public void shutDown(){
+		this.running = false;
+	}
+	
+	private class GDayThread extends Thread {
+		
+		private static final long SEND_INTERVAL = 10000;
+		private final byte[] gday;
+		
+		public GDayThread(){
+			this.gday = new Packet.GDay(nickname).toBytes();
+		}
+		
+		public void run(){
+			while(running) {
+				try {
+					Thread.sleep(SEND_INTERVAL);
+					socket.send(new DatagramPacket(gday, gday.length, InetAddress.getByName(addr), socket.getPort()));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+		}
 	}
 }
