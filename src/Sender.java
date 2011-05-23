@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -44,6 +46,20 @@ public class Sender {
 	        	// TODO: factor this out so that we can test it
 	        	System.out.print("> ");
 	        	String message = sc.next();
+	        	
+	        	if(message.equalsIgnoreCase("exit")) {
+	        		byte[] payload = new Packet.GBye(ourNickname).toBytes();
+	        		try {
+	        			// TODO: Why do we have to specify the port when we are sending to a multicast address?
+	        			// Do we need to specify? 
+						socket.send(new DatagramPacket(payload, payload.length, InetAddress.getByName(manager.getMulitcastAddr()), socket.getPort()));
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.exit(1);
+					}
+	        		System.exit(0);
+	        	}
+	        		
             	try {
 					sendSays(message);
 				} catch (IOException e) {

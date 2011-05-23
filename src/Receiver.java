@@ -1,14 +1,18 @@
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Receiver {
     private DatagramSocket socket;
     private MembershipManager manager;
+    private Sender sender;
+    private Map<String, Integer> lastSeqNumsReceived = new HashMap<String, Integer>();
     
     public Receiver(MembershipManager manager, DatagramSocket sock, Sender sender) throws IOException {
         this.socket = sock;
         this.manager = manager;
-        //socket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
+        this.sender = sender;
         new UDPListenerThread().run();
     }
     
@@ -26,25 +30,29 @@ public class Receiver {
 	                Packet type = Packet.getType(packet.getData());
 	                
 	                switch(type) {
-	                case SAYS: 
-	                    // TODO: print to screen
-                        // TODO: send YEAH reply
-	                    // send the response to the client at "address" and "port"
-	                    InetAddress address = packet.getAddress();
-	                    int port = packet.getPort();
-	                    packet = new DatagramPacket(buf, buf.length, address, port);
-	                    socket.send(packet);
-	                    break;
-	                case YEAH:
-	                	
-	                    break;
-	                case GDAY:
-	                	manager.receivedGday(new Packet.GDay(packet.getData()));
-	                case GBYE:
-	                	manager.recievedGbye(new Packet.GBye(packet.getData()));
-	                default: 
-	                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
-	                    continue;
+		                case SAYS: 
+		                	Packet.Says says = new Packet.Says(packet.getData());
+		                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
+		                	
+		                	if(lastSeqNum == null || lastSeqNum < says.sequenceNumber) {
+		                		System.out.println(Utils.boxify(says));
+		                		lastSeqNumsReceived.put(says.nickname, lastSeqNum);
+		                	}
+		                	
+		                    packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
+		                    socket.send(packet);
+		                    break;
+		                case YEAH:
+		                	sender.recievedYeah(new Packet.Yeah(packet.getData()));
+		                    break;
+		                case GDAY:
+		                	manager.receivedGday(new Peer(packet.getAddress(), packet.getPort()), new Packet.GDay(packet.getData()));
+		                	break;
+		                case GBYE:
+		                	manager.recievedGbye(new Packet.GBye(packet.getData()));
+		                	break;
+		                default: 
+		                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
 	                }
 	            } catch (IOException e) {
 	                e.printStackTrace();

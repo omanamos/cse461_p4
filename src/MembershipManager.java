@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MembershipManager{
 	
     private ConcurrentHashMap<String, Peer> peers = new ConcurrentHashMap<String, Peer>();
-	private boolean running;
 
 	private final MulticastSocket socket;
 	private final String addr;
@@ -45,16 +44,15 @@ public class MembershipManager{
 		return this.peers.get(nickname);
 	}
 	
-	public void receivedGday(Packet.GDay packet){
+	public void receivedGday(Peer peer, Packet.GDay packet){
+		if(!peers.containsKey(packet.nickname))
+			this.peers.put(packet.nickname, peer);
+		
 		this.peers.get(packet.nickname).receivedGDay();
 	}
 	
 	public void recievedGbye(Packet.GBye packet){
 		this.peers.remove(packet.nickname);
-	}
-	
-	public void shutDown(){
-		this.running = false;
 	}
 	
 	private class GDayThread extends Thread {
@@ -67,9 +65,11 @@ public class MembershipManager{
 		}
 		
 		public void run(){
-			while(running) {
+			while(true) {
 				try {
 					Thread.sleep(SEND_INTERVAL);
+					
+					// TODO: is this the right port?
 					socket.send(new DatagramPacket(gday, gday.length, InetAddress.getByName(addr), socket.getPort()));
 				} catch (Exception e) {
 					e.printStackTrace();

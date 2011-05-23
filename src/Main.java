@@ -9,8 +9,13 @@ public class Main {
 		String nickname = args[2];
 		
 		MulticastSocket socket = new MulticastSocket(port);
+		
+		System.err.println("allocated Port!");
 		MembershipManager m = new MembershipManager(multicastAddr, socket, nickname);
+		System.err.println("allocated Manager!");
 		Sender sender = new Sender(m, socket, nickname);
-		new Receiver(m, socket, sender);
+		System.err.println("allocated Sender!");
+		Receiver receiver = new Receiver(m, socket, sender);
+		System.err.println("allocated Receiver!");
 	}
 }
