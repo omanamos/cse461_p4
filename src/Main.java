@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.MulticastSocket;
 
 
 public class Main {
@@ -9,9 +10,9 @@ public class Main {
 		int port = Integer.parseInt(args[1]);
 		String nickname = args[2];
 		
-		DatagramSocket unicastSock = new DatagramSocket(port);
+		MulticastSocket socket = new MulticastSocket(port);
 		MembershipManager m = new MembershipManager(multicastAddr, nickname);
-		new Sender(m, unicastSock, nickname);
-		new Receiver(unicastSock);
+		new Sender(m, socket, nickname);
+		new Receiver(socket);
 	}
 }
