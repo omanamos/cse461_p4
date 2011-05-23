@@ -72,7 +72,9 @@ public enum Packet {
         }
         
         public Says(byte[] payload) {
-            String[] delimitedContents = payload.toString().split(" ");
+            // XXX what if the message includes spaces?
+            // We should only split the first two spaces
+            String[] delimitedContents = payload.toString().split(" "); 
             if(delimitedContents.length != 4 || !delimitedContents[0].equals("SAYS"))
                 throw new IllegalArgumentException("Could not parse payload as Says packet");
             

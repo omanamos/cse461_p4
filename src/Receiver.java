@@ -2,42 +2,48 @@ import java.io.*;
 import java.net.*;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Receiver {
-    public Receiver(DatagramSocket sock) throws IOException{
-        new UDPListenerThread(sock, this);
-    }
+    private static final int SOCKET_TIMEOUT_MILLIS = 10000;
     
+    private DatagramSocket socket;
     private final Lock yeahLock = new ReentrantLock();
     private final Condition yeahArrived = yeahLock.newCondition();
-    
     // needs to be global for multiple threads
     private Set<PendingYeah> receivedYeahs;
     
+    public Receiver(DatagramSocket sock) throws IOException {
+        this.socket = sock;
+        //socket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
+        new UDPListenerThread(this);
+    }
+    
     // Called by sender object
-    public void receiveYeah(PendingYeah pending) throws InterruptedException {
+    public void receiveYeah(PendingYeah pending) {
         yeahLock.lock();
         try {
+            // TODO: implement timeouts
             while(!receivedYeahs.contains(pending)) {
-                yeahArrived.await();
+                yeahArrived.await(SOCKET_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             }
             // We received what we were looking for!
             receivedYeahs.remove(pending);
+        } catch (InterruptedException e) {
+            // XXX Resend SAYS
         } finally {
             yeahLock.unlock();
         }
     }
     
 	public class UDPListenerThread extends Thread {
-	    protected DatagramSocket socket = null;
 	    private Receiver rec;
 
-	    public UDPListenerThread(DatagramSocket sock, Receiver rec) throws IOException {
-	        socket = sock;
-	        this.rec = rec;
+	    public UDPListenerThread(Receiver rec) throws IOException {
+	        this.rec = rec; // XXX is receiver ever used? no...
 	    }
 
 	    public void run() {
@@ -76,8 +82,6 @@ public class Receiver {
 	                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
 	                    continue;
 	                }
-	                
-	                
 	            } catch (IOException e) {
 	                e.printStackTrace();
 	                break;
