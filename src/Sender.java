@@ -6,10 +6,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 
 // TODO: does "reliability" entail in-order delivery? What if a peer is misbehaving by sending too many packets?
 
@@ -21,7 +19,7 @@ public class Sender {
     private String ourNickname;
     private int nextSequenceNumber; // NOT A LONG
     
-    // Sequence number -> Pending timeouts. Sequence numberes are unique across messages and across peers.
+    // Sequence number -> Pending timeouts. Sequence numbers are unique across messages and across peers.
     private Map<Integer, Retransmitter> pendingYeahs = 
     		new HashMap<Integer, Retransmitter>();
 
@@ -31,8 +29,7 @@ public class Sender {
 		this.ourNickname = nickname;
 		nextSequenceNumber = 0;
 		
-		// TODO: spawn new thread that listens on STDIN
-		new KeyboardListener().run();
+		new KeyboardListener();
 	}
 	
 	public void recievedYeah(Packet.Yeah yeahPkt) {
