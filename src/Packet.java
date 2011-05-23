@@ -32,7 +32,7 @@ public enum Packet {
         }
         
         public Yeah(byte[] payload) {
-            String[] delimitedContents = payload.toString().split(" ");
+            String[] delimitedContents = Utils.byteArrayToString(payload).toString().split(" ");
             if(delimitedContents.length != 2 || !delimitedContents[0].equals("YEAH"))
                 throw new IllegalArgumentException("Could not parse payload as YEAH packet");
             
@@ -74,12 +74,17 @@ public enum Packet {
         public Says(byte[] payload) {
             // XXX what if the message includes spaces?
             // We should only split the first two spaces
-            String[] delimitedContents = payload.toString().split(" "); 
+            String[] delimitedContents = Utils.byteArrayToString(payload).split(" "); 
             if(delimitedContents.length != 4 || !delimitedContents[0].equals("SAYS"))
                 throw new IllegalArgumentException("Could not parse payload as Says packet");
             
             this.nickname = delimitedContents[1];
             this.sequenceNumber = Integer.parseInt(delimitedContents[2]);
+            
+            String message = delimitedContents[3];
+            for(int i = 4; i < delimitedContents.length; i++){
+            	message += " " + delimitedContents;
+            }
             this.message = delimitedContents[3];
         }
         
@@ -93,6 +98,10 @@ public enum Packet {
     public static class GDay {
         public String nickname;
         
+        public GDay(byte[] payload){
+        	this(Utils.byteArrayToString(payload));
+        }
+        
         public GDay(String nickname) {
             this.nickname = nickname;
         }
@@ -105,6 +114,10 @@ public enum Packet {
     
     public static class GBye {
         public String nickname;
+        
+        public GBye(byte[] payload){
+        	this(Utils.byteArrayToString(payload));
+        }
         
         public GBye(String nickname) {
             this.nickname = nickname;

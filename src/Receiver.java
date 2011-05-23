@@ -11,15 +11,18 @@ public class Receiver {
     private static final int SOCKET_TIMEOUT_MILLIS = 10000;
     
     private DatagramSocket socket;
+    private MembershipManager manager;
+    
     private final Lock yeahLock = new ReentrantLock();
     private final Condition yeahArrived = yeahLock.newCondition();
     // needs to be global for multiple threads
     private Set<PendingYeah> receivedYeahs;
     
-    public Receiver(DatagramSocket sock) throws IOException {
+    public Receiver(DatagramSocket sock, MembershipManager manager) throws IOException {
         this.socket = sock;
+        this.manager = manager;
         //socket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
-        new UDPListenerThread(this);
+        new UDPListenerThread();
     }
     
     // Called by sender object
@@ -40,11 +43,6 @@ public class Receiver {
     }
     
 	public class UDPListenerThread extends Thread {
-	    private Receiver rec;
-
-	    public UDPListenerThread(Receiver rec) throws IOException {
-	        this.rec = rec; // XXX is receiver ever used? no...
-	    }
 
 	    public void run() {
 	        while (true) {
@@ -78,6 +76,8 @@ public class Receiver {
 	                        yeahLock.unlock();
 	                    }
 	                    break;
+	                case GDAY:
+	                	manager.receivedGday(new Packet.GDay(packet.getData()));
 	                default: 
 	                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
 	                    continue;
