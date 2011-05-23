@@ -1,17 +1,27 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+
+// TODO: does "reliability" entail in-order delivery? What if a peer is misbehaving by sending too many packets?
 
 public class Sender {
-    private static final int SOCKET_TIMEOUT_MILLIS = 10000;
+    private static final int TIMEOUT_MILLIS = 10000;
+    private Timer timer = new Timer();
     private MembershipManager manager;
     private DatagramSocket socket;
     private String ourNickname;
     private int nextSequenceNumber; // NOT A LONG
     
-    private ConcurrentHashMap<Peer, Integer> pendingYeahs = new ConcurrentHashMap<Peer, Integer>();
+    // Sequence number -> Pending timeouts. Sequence numberes are unique across messages and across peers.
+    private Map<Integer, Retransmitter> pendingYeahs = 
+    		new HashMap<Integer, Retransmitter>();
 
 	public Sender(MembershipManager manager, DatagramSocket sock, String nickname) {
 		this.manager = manager;
@@ -21,6 +31,10 @@ public class Sender {
 		
 		// TODO: spawn new thread that listens on STDIN
 		new KeyboardListener();
+	}
+	
+	public void recievedYeah(Packet.Yeah yeahPkt) {
+		pendingYeahs.remove(yeahPkt.sequenceNumber);
 	}
 	
 	public class KeyboardListener extends Thread {
@@ -42,14 +56,46 @@ public class Sender {
 	public void sendSays(String message) throws IOException {
 	    // Send to all receivers
 	    // nickname of the /sender/, not the receiver
-	    byte[] payload = new Packet.Says(ourNickname, nextSequenceNumber++, message).toBytes();
 	    
-	    for(Peer peer : manager.getAllPeers()) {
+	    for(Peer peer : manager.getAllPeer()) {
+	    	int sequenceNumber = nextSequenceNumber++;
+	    	byte[] payload = new Packet.Says(ourNickname, sequenceNumber, message).toBytes();
 	    	// stop and wait for each peer
 	    	DatagramPacket packet = new DatagramPacket(payload, payload.length, peer.getAddress(), peer.getPort());
 	    	socket.send(packet);
+	
+	    	timer.schedule(new Retransmitter(sequenceNumber, packet), TIMEOUT_MILLIS);
 	    }
-	    
-	    // TODO: register a Timeout
 	}
+	
+
+    public class Retransmitter extends TimerTask {
+    	public static final int MAX_RETRIES = 5;
+    	private int numberRetransmits = 0;
+    	private DatagramPacket outgoingPacket;
+		private int sequenceNumber;
+    	
+    	public Retransmitter(int sequenceNumber, DatagramPacket outgoingPacket) {
+    		this.numberRetransmits = 0;
+    		this.sequenceNumber = sequenceNumber;
+    		this.outgoingPacket = outgoingPacket;
+    	}
+    	
+        public void run() {
+        	numberRetransmits += 1;
+        	// if the YEAH hasn't been received...
+        	if(pendingYeahs.containsKey(sequenceNumber)) {
+        		if(numberRetransmits < MAX_RETRIES) {
+	        		try {
+						socket.send(outgoingPacket);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+	        		timer.schedule(this, TIMEOUT_MILLIS);
+        		} else {
+        			pendingYeahs.remove(sequenceNumber);
+        		}
+        	}
+        }
+    }
 }
