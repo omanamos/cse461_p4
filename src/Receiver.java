@@ -13,7 +13,7 @@ public class Receiver {
         this.socket = sock;
         this.manager = manager;
         this.sender = sender;
-        new UDPListenerThread().run();
+        new UDPListenerThread().start();
     }
     
 	public class UDPListenerThread extends Thread {

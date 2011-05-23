@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -29,7 +28,7 @@ public class Sender {
 		this.ourNickname = nickname;
 		nextSequenceNumber = 0;
 		
-		new KeyboardListener();
+		new KeyboardListener().start();
 	}
 	
 	public void recievedYeah(Packet.Yeah yeahPkt) {

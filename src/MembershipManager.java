@@ -19,7 +19,8 @@ public class MembershipManager{
 		this.addr = multicastAddr;
 		this.socket = socket;
 		this.nickname = nickname;
-		new GDayThread().run();
+		new GDayThread().start();
+		System.err.println("asdfasdf");
 	}
 	
 	public String getMulitcastAddr() {
@@ -67,13 +68,15 @@ public class MembershipManager{
 		public void run(){
 			while(true) {
 				try {
-					Thread.sleep(SEND_INTERVAL);
-					
 					// TODO: is this the right port?
 					socket.send(new DatagramPacket(gday, gday.length, InetAddress.getByName(addr), socket.getPort()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
+				try {
+					Thread.sleep(SEND_INTERVAL);
+				} catch (InterruptedException e) {}
             }
 		}
 	}
