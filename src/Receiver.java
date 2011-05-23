@@ -1,45 +1,15 @@
 import java.io.*;
 import java.net.*;
 
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public class Receiver {
-    private static final int SOCKET_TIMEOUT_MILLIS = 10000;
-    
     private DatagramSocket socket;
     private MembershipManager manager;
     
-    private final Lock yeahLock = new ReentrantLock();
-    private final Condition yeahArrived = yeahLock.newCondition();
-    // needs to be global for multiple threads
-    private Set<PendingYeah> receivedYeahs;
-    
-    public Receiver(DatagramSocket sock, MembershipManager manager) throws IOException {
+    public Receiver(MembershipManager manager, DatagramSocket sock, Sender sender) throws IOException {
         this.socket = sock;
         this.manager = manager;
         //socket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
-        new UDPListenerThread();
-    }
-    
-    // Called by sender object
-    public void receiveYeah(PendingYeah pending) {
-        yeahLock.lock();
-        try {
-            // TODO: implement timeouts
-            while(!receivedYeahs.contains(pending)) {
-                yeahArrived.await(SOCKET_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            }
-            // We received what we were looking for!
-            receivedYeahs.remove(pending);
-        } catch (InterruptedException e) {
-            // XXX Resend SAYS
-        } finally {
-            yeahLock.unlock();
-        }
+        new UDPListenerThread().run();
     }
     
 	public class UDPListenerThread extends Thread {
@@ -66,18 +36,12 @@ public class Receiver {
 	                    socket.send(packet);
 	                    break;
 	                case YEAH:
-	                    yeahLock.lock();
-	                    try {
-	                        receivedYeahs.add(new PendingYeah(
-	                                new Peer(packet.getAddress(), packet.getPort()), 
-	                                        new Packet.Yeah(packet.getData())));
-	                        yeahArrived.signal();
-	                    } finally {
-	                        yeahLock.unlock();
-	                    }
+	                	
 	                    break;
 	                case GDAY:
 	                	manager.receivedGday(new Packet.GDay(packet.getData()));
+	                case GBYE:
+	                	manager.recievedGbye(new Packet.GBye(packet.getData()));
 	                default: 
 	                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
 	                    continue;

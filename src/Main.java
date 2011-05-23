@@ -10,7 +10,7 @@ public class Main {
 		
 		MulticastSocket socket = new MulticastSocket(port);
 		MembershipManager m = new MembershipManager(multicastAddr, socket, nickname);
-		new Sender(m, socket, nickname);
-		new Receiver(socket, m);
+		Sender sender = new Sender(m, socket, nickname);
+		new Receiver(m, socket, sender);
 	}
 }

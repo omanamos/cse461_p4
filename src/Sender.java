@@ -54,7 +54,7 @@ public class Sender {
 	    // Send to all receivers
 	    // nickname of the /sender/, not the receiver
 	    
-	    for(Peer peer : manager.getAllPeer()) {
+	    for(Peer peer : manager.getAllPeers()) {
 	    	int sequenceNumber = nextSequenceNumber++;
 	    	byte[] payload = new Packet.Says(ourNickname, sequenceNumber, message).toBytes();
 	    	// stop and wait for each peer

@@ -25,7 +25,7 @@ public class Peer {
     	return curEpoch - epoch > THIRTY_SECONDS;
     }
     
-    public synchronized void receivedGday(){
+    public synchronized void receivedGDay(){
     	epoch = System.currentTimeMillis();
     }
 }
