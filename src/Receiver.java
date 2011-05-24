@@ -22,7 +22,7 @@ public class Receiver {
 	        while (true) {
 	            try {
 	                byte[] buf = new byte[256];
-
+	                
 	                // receive request
 	                DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	                socket.receive(packet);
@@ -32,7 +32,7 @@ public class Receiver {
 	                switch(type) {
 		                case SAYS:
 		                	Packet.Says says = new Packet.Says(packet.getData());
-		                	if(manager.isPeer(says.nickname)){
+		                	if(manager.isPeer(new User(says.nickname, packet.getAddress().toString()))){
 			                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
 			                	
 			                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
