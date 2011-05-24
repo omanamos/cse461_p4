@@ -36,7 +36,7 @@ public class Receiver {
 			                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
 			                	
 			                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
-			                		System.out.println(Utils.boxify(says));
+			                		System.out.println(new User(says.nickname, packet.getAddress().toString()).toString() + ": " + says.message);
 			                		lastSeqNum = says.sequenceNumber;
 			                	}
 			                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
