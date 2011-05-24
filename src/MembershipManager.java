@@ -55,7 +55,7 @@ public class MembershipManager{
 	
 	public void receivedGday(Peer peer, Packet.GDay packet){
 		User u = new User(packet.nickname, peer.getAddress().toString());
-		if(!peers.containsKey(packet.nickname)){
+		if(!peers.containsKey(u)){
 			this.peers.put(u, peer);
 			System.out.println(u + " joined the chat from addr " + peer.getAddress());
 		}
