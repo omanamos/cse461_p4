@@ -3,7 +3,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 
 public class Main {
-
 	public static void main(String[] args) throws IOException {
 		String multicastAddr = "230.0.0.1";
 		int port = 4446;
@@ -13,12 +12,13 @@ public class Main {
 			multicastAddr = args[0];
 			port = Integer.parseInt(args[1]);
 			nickname = args[1];
+		}
 		
 		MulticastSocket socket = new MulticastSocket(port);
 		socket.joinGroup(InetAddress.getByName(multicastAddr));
 
-		MembershipManager m = new MembershipManager(multicastAddr, socket, nickname);
+		MembershipManager m = new MembershipManager(socket, multicastAddr, port, nickname);
 		Sender sender = new Sender(m, socket, nickname);
-		Receiver receiver = new Receiver(m, socket, sender);
+		new Receiver(m, socket, sender);
 	}
 }

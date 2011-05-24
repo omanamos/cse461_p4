@@ -14,13 +14,15 @@ public class MembershipManager{
 	private final MulticastSocket socket;
 	private final String addr;
 	private final String nickname;
+	private final int port;
 	
-	public MembershipManager(String multicastAddr, MulticastSocket socket, String nickname){
+	public MembershipManager(MulticastSocket socket, String multicastAddr, int port, String nickname){
 		this.addr = multicastAddr;
 		this.socket = socket;
 		this.nickname = nickname;
+		this.port = port;
+		
 		new GDayThread().start();
-		System.err.println("asdfasdf");
 	}
 	
 	public String getMulitcastAddr() {
@@ -46,10 +48,12 @@ public class MembershipManager{
 	}
 	
 	public void receivedGday(Peer peer, Packet.GDay packet){
-		if(!peers.containsKey(packet.nickname))
-			this.peers.put(packet.nickname, peer);
-		
-		this.peers.get(packet.nickname).receivedGDay();
+		//if(!this.nickname.equals(packet.nickname)){
+			if(!peers.containsKey(packet.nickname))
+				this.peers.put(packet.nickname, peer);
+			
+			this.peers.get(packet.nickname).receivedGDay();
+		//}
 	}
 	
 	public void recievedGbye(Packet.GBye packet){
@@ -69,7 +73,7 @@ public class MembershipManager{
 			while(true) {
 				try {
 					// TODO: is this the right port?
-					socket.send(new DatagramPacket(gday, gday.length, InetAddress.getByName(addr), socket.getPort()));
+					socket.send(new DatagramPacket(gday, gday.length, InetAddress.getByName(addr), port));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

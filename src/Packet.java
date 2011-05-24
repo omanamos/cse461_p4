@@ -5,7 +5,7 @@ public enum Packet {
     GBYE;
     
     public static Packet getType(byte[] payload) {
-        String[] delimitedContents = payload.toString().split(" ");
+        String[] delimitedContents = Utils.byteArrayToString(payload).split(" ");
         if(delimitedContents.length == 0)
             return null;
             
@@ -32,11 +32,11 @@ public enum Packet {
         }
         
         public Yeah(byte[] payload) {
-            String[] delimitedContents = Utils.byteArrayToString(payload).toString().split(" ");
+            String[] delimitedContents = Utils.byteArrayToString(payload).split(" ");
             if(delimitedContents.length != 2 || !delimitedContents[0].equals("YEAH"))
                 throw new IllegalArgumentException("Could not parse payload as YEAH packet");
             
-            this.sequenceNumber = Integer.parseInt(delimitedContents[1]);
+            this.sequenceNumber = Integer.parseInt(delimitedContents[1].trim());
         }
         
         public byte[] toBytes() {
@@ -72,20 +72,18 @@ public enum Packet {
         }
         
         public Says(byte[] payload) {
-            // XXX what if the message includes spaces?
-            // We should only split the first two spaces
             String[] delimitedContents = Utils.byteArrayToString(payload).split(" "); 
-            if(delimitedContents.length != 4 || !delimitedContents[0].equals("SAYS"))
+            if(delimitedContents.length < 4 || !delimitedContents[0].equals("SAYS"))
                 throw new IllegalArgumentException("Could not parse payload as Says packet");
             
             this.nickname = delimitedContents[1];
             this.sequenceNumber = Integer.parseInt(delimitedContents[2]);
             
-            String message = delimitedContents[3];
+            StringBuilder message = new StringBuilder(delimitedContents[3]);
             for(int i = 4; i < delimitedContents.length; i++){
-            	message += " " + delimitedContents;
+            	message.append(" " + delimitedContents[i].trim());
             }
-            this.message = delimitedContents[3];
+            this.message = message.toString();
         }
         
         public byte[] toBytes() {
@@ -99,7 +97,7 @@ public enum Packet {
         public String nickname;
         
         public GDay(byte[] payload){
-        	this(Utils.byteArrayToString(payload));
+        	this(Utils.byteArrayToString(payload).split(" ")[1].trim());
         }
         
         public GDay(String nickname) {
@@ -116,7 +114,7 @@ public enum Packet {
         public String nickname;
         
         public GBye(byte[] payload){
-        	this(Utils.byteArrayToString(payload));
+        	this(Utils.byteArrayToString(payload).split(" ")[1].trim());
         }
         
         public GBye(String nickname) {

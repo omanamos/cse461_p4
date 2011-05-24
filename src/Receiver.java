@@ -34,10 +34,13 @@ public class Receiver {
 		                	Packet.Says says = new Packet.Says(packet.getData());
 		                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
 		                	
-		                	if(lastSeqNum == null || lastSeqNum < says.sequenceNumber) {
+		                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
 		                		System.out.println(Utils.boxify(says));
-		                		lastSeqNumsReceived.put(says.nickname, lastSeqNum);
+		                		lastSeqNum = says.sequenceNumber;
 		                	}
+		                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
+		                	
+		                	buf = new Packet.Yeah(lastSeqNum).toBytes();
 		                	
 		                    packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
 		                    socket.send(packet);
