@@ -4,10 +4,15 @@ import java.net.MulticastSocket;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException{
-		String multicastAddr = args[0];
-		int port = Integer.parseInt(args[1]);
-		String nickname = args[2];
+	public static void main(String[] args) throws IOException {
+		String multicastAddr = "230.0.0.1";
+		int port = 4446;
+		String nickname = "FROODY_SHOES";
+		
+		if(args.length == 3) {
+			multicastAddr = args[0];
+			port = Integer.parseInt(args[1]);
+			nickname = args[1];
 		
 		MulticastSocket socket = new MulticastSocket(port);
 		socket.joinGroup(InetAddress.getByName(multicastAddr));
