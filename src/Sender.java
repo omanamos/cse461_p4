@@ -1,4 +1,3 @@
-import java.awt.geom.CubicCurve2D;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -12,7 +11,7 @@ import java.util.TimerTask;
 // TODO: does "reliability" entail in-order delivery? What if a peer is misbehaving by sending too many packets?
 
 public class Sender {
-    private static final int TIMEOUT_MILLIS = 10000;
+    private static final int TIMEOUT_MILLIS = 500;
     private Timer timer = new Timer();
     private MembershipManager manager;
     private DatagramSocket socket;

@@ -86,7 +86,7 @@ public class MembershipManager{
 	
 	private class GDayThread extends Thread {
 		
-		private static final long SEND_INTERVAL = 10000;
+		private static final long SEND_INTERVAL = 1000;
 		private final byte[] gday;
 		
 		public GDayThread(){
