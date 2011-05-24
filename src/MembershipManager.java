@@ -1,6 +1,8 @@
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -15,12 +17,15 @@ public class MembershipManager{
 	private final String addr;
 	private final User user;
 	private final int port;
+
+	private List<ManagerListener> listeners;
 	
 	public MembershipManager(MulticastSocket socket, String multicastAddr, int port, User user){
 		this.addr = multicastAddr;
 		this.socket = socket;
 		this.user = user;
 		this.port = port;
+		this.listeners = new ArrayList<ManagerListener>();
 		
 		new GDayThread().start();
 	}
@@ -41,9 +46,8 @@ public class MembershipManager{
 			if(!nickname.equals(this.user) && this.peers.get(nickname).isExpired(curEpoch))
 				toRemove.add(nickname);
 		
-		for(User nickname : toRemove){
-			System.out.println(nickname + " left the chat.");
-			this.peers.remove(nickname);
+		for(User u : toRemove){
+			this.disconnect(u);
 		}
 		
 	    return Collections.unmodifiableCollection(this.peers.values());
@@ -65,8 +69,19 @@ public class MembershipManager{
 	
 	public void recievedGbye(String address, Packet.GBye packet){
 		User u = new User(packet.nickname, address);
+		this.disconnect(u);
+	}
+	
+	public void registerListener(ManagerListener listener) {
+		this.listeners.add(listener);
+	}
+	
+	private void disconnect(User u){
 		System.out.println(u + " left the chat.");
 		this.peers.remove(u);
+		
+		for(ManagerListener listener : listeners)
+			listener.disconnect(u);
 	}
 	
 	private class GDayThread extends Thread {

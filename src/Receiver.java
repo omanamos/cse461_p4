@@ -3,17 +3,21 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Receiver {
+public class Receiver implements ManagerListener{
     private DatagramSocket socket;
     private MembershipManager manager;
     private Sender sender;
-    private Map<String, Integer> lastSeqNumsReceived = new HashMap<String, Integer>();
+    private Map<User, Integer> lastSeqNumsReceived = new HashMap<User, Integer>();
     
     public Receiver(MembershipManager manager, DatagramSocket sock, Sender sender) throws IOException {
         this.socket = sock;
         this.manager = manager;
         this.sender = sender;
         new UDPListenerThread().start();
+    }
+    
+    public void disconnect(User u){
+    	this.lastSeqNumsReceived.remove(u);
     }
     
 	public class UDPListenerThread extends Thread {
@@ -33,13 +37,14 @@ public class Receiver {
 		                case SAYS:
 		                	Packet.Says says = new Packet.Says(packet.getData());
 		                	if(manager.isPeer(new User(says.nickname, packet.getAddress().toString()))){
+		                		User u = new User(says.nickname, packet.getAddress().toString());
 			                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
 			                	
 			                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
-			                		System.out.println(new User(says.nickname, packet.getAddress().toString()).toString() + ": " + says.message);
+			                		System.out.println(u.toString() + ": " + says.message);
 			                		lastSeqNum = says.sequenceNumber;
 			                	}
-			                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
+			                	lastSeqNumsReceived.put(u, lastSeqNum);
 			                	
 			                	try{
 			                		buf = new Packet.Yeah(lastSeqNum).toBytes();
