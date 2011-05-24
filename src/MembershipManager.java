@@ -9,17 +9,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MembershipManager{
 	
-    private ConcurrentHashMap<String, Peer> peers = new ConcurrentHashMap<String, Peer>();
+    private ConcurrentHashMap<User, Peer> peers = new ConcurrentHashMap<User, Peer>();
 
 	private final MulticastSocket socket;
 	private final String addr;
-	private final String nickname;
+	private final User user;
 	private final int port;
 	
-	public MembershipManager(MulticastSocket socket, String multicastAddr, int port, String nickname){
+	public MembershipManager(MulticastSocket socket, String multicastAddr, int port, User user){
 		this.addr = multicastAddr;
 		this.socket = socket;
-		this.nickname = nickname;
+		this.user = user;
 		this.port = port;
 		
 		new GDayThread().start();
@@ -35,13 +35,13 @@ public class MembershipManager{
 	
 	public Collection<Peer> getAllPeers() {
 		long curEpoch = System.currentTimeMillis();
-		Set<String> toRemove = new HashSet<String>();
+		Set<User> toRemove = new HashSet<User>();
 		
-		for(String nickname : this.peers.keySet())
-			if(!nickname.equals(this.nickname) && this.peers.get(nickname).isExpired(curEpoch))
+		for(User nickname : this.peers.keySet())
+			if(!nickname.equals(this.user) && this.peers.get(nickname).isExpired(curEpoch))
 				toRemove.add(nickname);
 		
-		for(String nickname : toRemove){
+		for(User nickname : toRemove){
 			System.out.println(nickname + " left the chat.");
 			this.peers.remove(nickname);
 		}
@@ -54,17 +54,19 @@ public class MembershipManager{
 	}
 	
 	public void receivedGday(Peer peer, Packet.GDay packet){
+		User u = new User(packet.nickname, peer.getAddress().toString());
 		if(!peers.containsKey(packet.nickname)){
-			this.peers.put(packet.nickname, peer);
-			System.out.println(packet.nickname + " joined the chat from addr " + peer.getAddress());
+			this.peers.put(u, peer);
+			System.out.println(u + " joined the chat from addr " + peer.getAddress());
 		}
 		
-		this.peers.get(packet.nickname).receivedGDay();
+		this.peers.get(u).receivedGDay();
 	}
 	
-	public void recievedGbye(Packet.GBye packet){
-		System.out.println(packet.nickname + " left the chat.");
-		this.peers.remove(packet.nickname);
+	public void recievedGbye(String address, Packet.GBye packet){
+		User u = new User(packet.nickname, address);
+		System.out.println(u + " left the chat.");
+		this.peers.remove(u);
 	}
 	
 	private class GDayThread extends Thread {
@@ -73,7 +75,7 @@ public class MembershipManager{
 		private final byte[] gday;
 		
 		public GDayThread(){
-			this.gday = new Packet.GDay(nickname).toBytes();
+			this.gday = new Packet.GDay(user.nickname).toBytes();
 		}
 		
 		public void run(){

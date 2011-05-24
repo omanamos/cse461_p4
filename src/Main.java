@@ -17,7 +17,7 @@ public class Main {
 		MulticastSocket socket = new MulticastSocket(port);
 		socket.joinGroup(InetAddress.getByName(multicastAddr));
 
-		MembershipManager m = new MembershipManager(socket, multicastAddr, port, nickname);
+		MembershipManager m = new MembershipManager(socket, multicastAddr, port, new User(nickname, InetAddress.getLocalHost().getAddress().toString()));
 		Sender sender = new Sender(m, socket, port, nickname);
 		new Receiver(m, socket, sender);
 	}

@@ -57,7 +57,7 @@ public class Receiver {
 		                	manager.receivedGday(new Peer(packet.getAddress(), packet.getPort()), new Packet.GDay(packet.getData()));
 		                	break;
 		                case GBYE:
-		                	manager.recievedGbye(new Packet.GBye(packet.getData()));
+		                	manager.recievedGbye(packet.getAddress().toString(), new Packet.GBye(packet.getData()));
 		                	break;
 		                default: 
 		                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
