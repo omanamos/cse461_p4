@@ -37,6 +37,9 @@ public class Sender {
 		pendingYeahs.remove(yeahPkt.sequenceNumber);
 	}
 	
+	/**
+	 * Exits using System.exit, which isn't the best solution, but we are toooo lazy.
+	 */
 	public class KeyboardListener extends Thread {
 	    public void run() {
 	    	Scanner sc = new Scanner(System.in);

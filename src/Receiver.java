@@ -34,7 +34,6 @@ public class Receiver implements ManagerListener{
 	                
 	                switch(type) {
 		                case SAYS:
-		                	
 		                	Packet.Says says = null; 
 		                	try {
 		                		says = new Packet.Says(packet.getData());
