@@ -21,8 +21,8 @@ public class Receiver implements ManagerListener{
     }
     
 	public class UDPListenerThread extends Thread {
-
 	    public void run() {
+	    	int i = 0; // XXX
 	        while (true) {
 	            try {
 	                byte[] buf = new byte[256];
@@ -35,7 +35,17 @@ public class Receiver implements ManagerListener{
 	                
 	                switch(type) {
 		                case SAYS:
-		                	Packet.Says says = new Packet.Says(packet.getData());
+		                	if((i += 1) % 2 == 0) {
+		                		break; 
+		                	}
+		                	
+		                	Packet.Says says = null; 
+		                	try {
+		                		says = new Packet.Says(packet.getData());
+		                	} catch(IllegalArgumentException e) {
+		                		System.err.println("Recieved illegal packet");
+		                	}
+		                	
 		                	if(manager.isPeer(new User(says.nickname, packet.getAddress().toString()))){
 		                		User u = new User(says.nickname, packet.getAddress().toString());
 			                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
@@ -55,14 +65,26 @@ public class Receiver implements ManagerListener{
 		                    break;
 		                case YEAH:
 		                	try{
+		                		try {
 		                		sender.recievedYeah(new Packet.Yeah(packet.getData()));
-		                	}catch(Exception e){}
+		                		} catch(IllegalArgumentException e) {
+		                			System.err.println("Received malformed YEAH packet");		                			
+		                		}
+		                	}catch(Exception e){} 
 		                    break;
 		                case GDAY:
-		                	manager.receivedGday(new Peer(packet.getAddress(), packet.getPort()), new Packet.GDay(packet.getData()));
+		                	try {
+		                		manager.receivedGday(new Peer(packet.getAddress(), packet.getPort()), new Packet.GDay(packet.getData()));	
+		                		} catch(IllegalArgumentException e) {
+		                			System.err.println("Received malformed GDAY packet");		                			
+		                		}
 		                	break;
 		                case GBYE:
-		                	manager.recievedGbye(packet.getAddress().toString(), new Packet.GBye(packet.getData()));
+		                	try {
+			                	manager.recievedGbye(packet.getAddress().toString(), new Packet.GBye(packet.getData()));
+		                		} catch(IllegalArgumentException e) {
+		                			System.err.println("Received malformed GBYE packet");		                			
+		                		}
 		                	break;
 		                default: 
 		                    System.err.println("Unknown Packet contents! " + packet.getData().toString());
