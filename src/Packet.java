@@ -36,7 +36,11 @@ public enum Packet {
             if(delimitedContents.length != 2 || !delimitedContents[0].equals("YEAH"))
                 throw new IllegalArgumentException("Could not parse payload as YEAH packet");
             
-            this.sequenceNumber = Integer.parseInt(delimitedContents[1].trim());
+            try {
+            	this.sequenceNumber = Integer.parseInt(delimitedContents[1].trim());
+            } catch (NumberFormatException e) {
+            	throw new IllegalArgumentException("Could not parse payload as an Int");
+            }
         }
         
         public byte[] toBytes() {
@@ -76,6 +80,9 @@ public enum Packet {
             if(delimitedContents.length < 4 || !delimitedContents[0].equals("SAYS"))
                 throw new IllegalArgumentException("Could not parse payload as Says packet");
             
+            if(delimitedContents[1].matches("\\s"))
+            	throw new IllegalArgumentException("Nicknames cannot contain spaces!");
+            
             this.nickname = delimitedContents[1];
             this.sequenceNumber = Integer.parseInt(delimitedContents[2]);
             
@@ -87,7 +94,6 @@ public enum Packet {
         }
         
         public byte[] toBytes() {
-            // XXX what if nickname has a space?
             String contents = "SAYS " + nickname + " " + sequenceNumber + " " + message;
             return contents.getBytes();
         }
@@ -96,11 +102,18 @@ public enum Packet {
     public static class GDay {
         public String nickname;
         
-        public GDay(byte[] payload){
-        	this(Utils.byteArrayToString(payload).split(" ")[1].trim());
+        public GDay(byte[] payload) {
+        	String[] delimitedContents = Utils.byteArrayToString(payload).split(" ");
+        	if(!delimitedContents[0].equals("GDAY") || delimitedContents.length < 2) {
+        		throw new IllegalArgumentException("Packet could not be parsed as GDAY");
+        	}
+        	this.nickname = delimitedContents[1].trim();
         }
         
         public GDay(String nickname) {
+        	if(nickname.matches("\\s")) {
+        		throw new IllegalArgumentException("No spaces allowed in nicknames!");
+        	}
             this.nickname = nickname;
         }
         
@@ -114,10 +127,17 @@ public enum Packet {
         public String nickname;
         
         public GBye(byte[] payload){
-        	this(Utils.byteArrayToString(payload).split(" ")[1].trim());
+        	String[] delimitedContents = Utils.byteArrayToString(payload).split(" ");
+        	if(!delimitedContents[0].equals("GBYE") || delimitedContents.length < 2) {
+        		throw new IllegalArgumentException("Packet could not be parsed as GBYE");
+        	}
+        	this.nickname = delimitedContents[1].trim();
         }
         
         public GBye(String nickname) {
+        	if(nickname.matches("\\s")) {
+        		throw new IllegalArgumentException("No spaces allowed in nicknames!");
+        	}
             this.nickname = nickname;
         }
         
