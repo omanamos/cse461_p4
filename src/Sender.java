@@ -41,7 +41,7 @@ public class Sender {
 	        while (true) {
 	        	// TODO: factor this out so that we can test it
 	        	System.out.print("> ");
-	        	String message = sc.next();
+	        	String message = sc.nextLine();
 	        	
 	        	if(message.equalsIgnoreCase("exit")) {
 	        		byte[] payload = new Packet.GBye(ourNickname).toBytes();

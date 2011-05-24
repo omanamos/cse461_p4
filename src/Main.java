@@ -5,15 +5,15 @@ import java.net.MulticastSocket;
 public class Main {
 
 	public static void main(String[] args) throws IOException{
-		String multicastAddr = args[0];
+		String addr = args[0];
 		int port = Integer.parseInt(args[1]);
 		String nickname = args[2];
 		
 		MulticastSocket socket = new MulticastSocket(port);
-		socket.joinGroup(InetAddress.getByName(multicastAddr));
+		socket.joinGroup(InetAddress.getByName(addr));
 
-		MembershipManager m = new MembershipManager(multicastAddr, socket, nickname);
+		MembershipManager m = new MembershipManager(socket, addr, port, nickname);
 		Sender sender = new Sender(m, socket, nickname);
-		Receiver receiver = new Receiver(m, socket, sender);
+		new Receiver(m, socket, sender);
 	}
 }

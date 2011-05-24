@@ -14,6 +14,10 @@ public class Utils {
 	}
 	
 	public static String boxify(Packet.Says packet){
+		return packet.message + "\n\t" + packet.nickname + "\n\n";
+	}
+	
+	public static String boxify1(Packet.Says packet){
         String[] lines = packet.message.split("\\\\n");
         int width = packet.nickname.length() + 6;
 
