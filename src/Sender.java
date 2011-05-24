@@ -76,8 +76,10 @@ public class Sender {
 	    	// stop and wait for each peer
 	    	DatagramPacket packet = new DatagramPacket(payload, payload.length, peer.getAddress(), peer.getPort());
 	    	socket.send(packet);
-	
-	    	timer.schedule(new Retransmitter(sequenceNumber, packet), TIMEOUT_MILLIS);
+	    	
+	    	Retransmitter trans = new Retransmitter(sequenceNumber, packet); 
+	    	timer.schedule(trans, TIMEOUT_MILLIS);
+	    	this.pendingYeahs.put(sequenceNumber, trans);
 	    }
 	}
 	
