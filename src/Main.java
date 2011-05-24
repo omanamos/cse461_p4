@@ -11,7 +11,7 @@ public class Main {
 		if(args.length == 3) {
 			multicastAddr = args[0];
 			port = Integer.parseInt(args[1]);
-			nickname = args[1];
+			nickname = args[2];
 		}
 		
 		MulticastSocket socket = new MulticastSocket(port);
