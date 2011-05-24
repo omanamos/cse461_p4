@@ -18,7 +18,7 @@ public class Main {
 		socket.joinGroup(InetAddress.getByName(multicastAddr));
 
 		MembershipManager m = new MembershipManager(socket, multicastAddr, port, nickname);
-		Sender sender = new Sender(m, socket, nickname);
+		Sender sender = new Sender(m, socket, port, nickname);
 		new Receiver(m, socket, sender);
 	}
 }

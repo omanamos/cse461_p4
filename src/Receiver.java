@@ -40,13 +40,16 @@ public class Receiver {
 		                	}
 		                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
 		                	
-		                	buf = new Packet.Yeah(lastSeqNum).toBytes();
-		                	
-		                    packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
-		                    socket.send(packet);
+		                	try{
+		                		buf = new Packet.Yeah(lastSeqNum).toBytes();
+		                		packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
+			                    socket.send(packet);
+		                	}catch(Exception e){}
 		                    break;
 		                case YEAH:
-		                	sender.recievedYeah(new Packet.Yeah(packet.getData()));
+		                	try{
+		                		sender.recievedYeah(new Packet.Yeah(packet.getData()));
+		                	}catch(Exception e){}
 		                    break;
 		                case GDAY:
 		                	manager.receivedGday(new Peer(packet.getAddress(), packet.getPort()), new Packet.GDay(packet.getData()));

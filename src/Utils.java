@@ -14,7 +14,7 @@ public class Utils {
 	}
 	
 	public static String boxify(Packet.Says packet){
-		return packet.message + "\n\t" + packet.nickname + "\n\n";
+		return packet.nickname + ": " + packet.message + "\n";
 	}
 	
 	public static String boxify1(Packet.Says packet){

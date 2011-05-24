@@ -37,8 +37,10 @@ public class MembershipManager{
 			if(!nickname.equals(this.nickname) && this.peers.get(nickname).isExpired(curEpoch))
 				toRemove.add(nickname);
 		
-		for(String nickname : toRemove)
+		for(String nickname : toRemove){
+			System.out.println(nickname + " left the chat.");
 			this.peers.remove(nickname);
+		}
 		
 	    return Collections.unmodifiableCollection(this.peers.values());
 	}
@@ -48,15 +50,16 @@ public class MembershipManager{
 	}
 	
 	public void receivedGday(Peer peer, Packet.GDay packet){
-		//if(!this.nickname.equals(packet.nickname)){
-			if(!peers.containsKey(packet.nickname))
-				this.peers.put(packet.nickname, peer);
-			
-			this.peers.get(packet.nickname).receivedGDay();
-		//}
+		if(!peers.containsKey(packet.nickname)){
+			this.peers.put(packet.nickname, peer);
+			System.out.println(packet.nickname + " joined the chat from addr " + peer.getAddress());
+		}
+		
+		this.peers.get(packet.nickname).receivedGDay();
 	}
 	
 	public void recievedGbye(Packet.GBye packet){
+		System.out.println(packet.nickname + " left the chat.");
 		this.peers.remove(packet.nickname);
 	}
 	
