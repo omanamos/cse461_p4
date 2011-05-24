@@ -1,3 +1,4 @@
+import java.awt.geom.CubicCurve2D;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -90,13 +91,22 @@ public class Sender {
     	private DatagramPacket outgoingPacket;
 		private int sequenceNumber;
     	
+		public Retransmitter(Retransmitter r){
+			this(r.sequenceNumber, r.outgoingPacket, r.numberRetransmits);
+		}
+		
     	public Retransmitter(int sequenceNumber, DatagramPacket outgoingPacket) {
-    		this.numberRetransmits = 0;
+    		this(sequenceNumber, outgoingPacket, 0);
+    	}
+    	
+    	public Retransmitter(int sequenceNumber, DatagramPacket outgoingPacket, int curRetransmits){
+    		this.numberRetransmits = curRetransmits;
     		this.sequenceNumber = sequenceNumber;
     		this.outgoingPacket = outgoingPacket;
     	}
     	
         public void run() {
+        	this.cancel();
         	numberRetransmits += 1;
         	// if the YEAH hasn't been received...
         	if(pendingYeahs.containsKey(sequenceNumber)) {
@@ -106,7 +116,7 @@ public class Sender {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-	        		timer.schedule(this, TIMEOUT_MILLIS);
+	        		timer.schedule(new Retransmitter(this), TIMEOUT_MILLIS);
         		} else {
         			pendingYeahs.remove(sequenceNumber);
         		}
