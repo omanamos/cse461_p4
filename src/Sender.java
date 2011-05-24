@@ -97,6 +97,7 @@ public class Sender {
     	}
     	
         public void run() {
+        	this.cancel();
         	numberRetransmits += 1;
         	// if the YEAH hasn't been received...
         	if(pendingYeahs.containsKey(sequenceNumber)) {
