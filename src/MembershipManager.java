@@ -29,8 +29,8 @@ public class MembershipManager{
 		return addr;
 	}
 	
-	public boolean isPeer(String nickname){
-		return this.peers.containsKey(nickname);
+	public boolean isPeer(User u){
+		return this.peers.containsKey(u);
 	}
 	
 	public Collection<Peer> getAllPeers() {
