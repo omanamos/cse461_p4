@@ -30,21 +30,23 @@ public class Receiver {
 	                Packet type = Packet.getType(packet.getData());
 	                
 	                switch(type) {
-		                case SAYS: 
+		                case SAYS:
 		                	Packet.Says says = new Packet.Says(packet.getData());
-		                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
-		                	
-		                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
-		                		System.out.println(Utils.boxify(says));
-		                		lastSeqNum = says.sequenceNumber;
+		                	if(manager.isPeer(says.nickname)){
+			                	Integer lastSeqNum = lastSeqNumsReceived.get(says.nickname);
+			                	
+			                	if(lastSeqNum == null || lastSeqNum <= says.sequenceNumber) {
+			                		System.out.println(Utils.boxify(says));
+			                		lastSeqNum = says.sequenceNumber;
+			                	}
+			                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
+			                	
+			                	try{
+			                		buf = new Packet.Yeah(lastSeqNum).toBytes();
+			                		packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
+				                    socket.send(packet);
+			                	}catch(Exception e){}
 		                	}
-		                	lastSeqNumsReceived.put(says.nickname, lastSeqNum);
-		                	
-		                	try{
-		                		buf = new Packet.Yeah(lastSeqNum).toBytes();
-		                		packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
-			                    socket.send(packet);
-		                	}catch(Exception e){}
 		                    break;
 		                case YEAH:
 		                	try{

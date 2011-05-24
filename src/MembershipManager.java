@@ -29,6 +29,10 @@ public class MembershipManager{
 		return addr;
 	}
 	
+	public boolean isPeer(String nickname){
+		return this.peers.containsKey(nickname);
+	}
+	
 	public Collection<Peer> getAllPeers() {
 		long curEpoch = System.currentTimeMillis();
 		Set<String> toRemove = new HashSet<String>();
