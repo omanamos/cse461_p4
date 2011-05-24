@@ -22,7 +22,6 @@ public class Receiver implements ManagerListener{
     
 	public class UDPListenerThread extends Thread {
 	    public void run() {
-	    	int i = 0; // XXX
 	        while (true) {
 	            try {
 	                byte[] buf = new byte[256];
@@ -35,10 +34,6 @@ public class Receiver implements ManagerListener{
 	                
 	                switch(type) {
 		                case SAYS:
-		                	if((i += 1) % 2 == 0) {
-		                		break; 
-		                	}
-		                	
 		                	Packet.Says says = null; 
 		                	try {
 		                		says = new Packet.Says(packet.getData());
