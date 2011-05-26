@@ -1,0 +1,36 @@
+Ryan Oman
+CSE 461 - Homework 4
+
+1
+----------------
+
+
+
+2
+-----------------
+
+
+
+Textbook Problems
+-----------------
+
+5.18
+-----------------
+Maximum data rate = 228.89 MB/s
+
+5.22
+----------------
+There is not a guarantee, but there is a high likelihood. Hosts are policed on how much expediated traffic they send, but there could still be a ton of hosts that are all sending a small amount of expediated traffic but no regular traffic. In that case, regular traffic would have a lower delay. This is an unlikely situation, since the likelihood that a ton of hosts aren't sending any regular traffic is rather low.
+
+6.14
+---------------
+AIAD does not converge quickly, but it is very stable. It does not converge very quickly because neither host gives up more bandwidth during decrease than it takes during and increase. In other words, this will keep the network running at a good efficiency (and is stable), but not necessarily fair.
+
+MIAD 
+
+MIMD has the same characteristics of AIAD. Since the same mathematical function is used for increaseing and decreasing the convergence is slow but the stability is high.
+
+
+7.7
+----------------
+Duplicate the top-level domain name server and have the clients any-cast the domain name server. All of the duplicated domain name servers would have the same address, so the naming scheme isn't changed. The load can then be distributed across those duplicated servers based on which is the closest to the requester (based on response time).
