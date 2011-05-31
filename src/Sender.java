@@ -2,11 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 // TODO: does "reliability" entail in-order delivery? What if a peer is misbehaving by sending too many packets?
 
@@ -20,10 +16,12 @@ public class Sender {
     private int port;
     
     // Sequence number -> Pending timeouts. Sequence numbers are unique across messages and across peers.
-    private Map<Integer, Retransmitter> pendingYeahs = 
-    		new HashMap<Integer, Retransmitter>();
+    private Map<Integer, Retransmitter> pendingYeahs;
+	private Queue<String> sendQueue;
 
 	public Sender(MembershipManager manager, DatagramSocket sock, int port, String nickname) {
+		this.pendingYeahs = new HashMap<Integer, Retransmitter>();
+		this.sendQueue = new LinkedList<String>();
 		this.manager = manager;
 		this.socket = sock;
 		this.ourNickname = nickname;
@@ -35,6 +33,14 @@ public class Sender {
 	
 	public void recievedYeah(Packet.Yeah yeahPkt) {
 		pendingYeahs.remove(yeahPkt.sequenceNumber);
+		this.sendQueue.poll();
+		if(!this.sendQueue.isEmpty()){
+			try{
+				this.sendSays();
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
@@ -73,19 +79,25 @@ public class Sender {
 	    // Send to all receivers
 	    // nickname of the /sender/, not the receiver
 	    
-	    for(Peer peer : manager.getAllPeers()) {
-	    	int sequenceNumber = nextSequenceNumber++;
-	    	byte[] payload = new Packet.Says(ourNickname, sequenceNumber, message).toBytes();
-	    	// stop and wait for each peer
-	    	DatagramPacket packet = new DatagramPacket(payload, payload.length, peer.getAddress(), peer.getPort());
-	    	socket.send(packet);
-	    	
-	    	Retransmitter trans = new Retransmitter(sequenceNumber, packet); 
-	    	timer.schedule(trans, TIMEOUT_MILLIS);
-	    	this.pendingYeahs.put(sequenceNumber, trans);
-	    }
+		this.sendQueue.add(message);
+		if(this.sendQueue.size() == 1)
+			this.sendSays();
 	}
 	
+	private void sendSays() throws IOException{
+		String message = this.sendQueue.poll();
+		for(Peer peer : manager.getAllPeers()) {
+			int sequenceNumber = nextSequenceNumber++;
+			byte[] payload = new Packet.Says(ourNickname, sequenceNumber, message).toBytes();
+			// stop and wait for each peer
+			DatagramPacket packet = new DatagramPacket(payload, payload.length, peer.getAddress(), peer.getPort());
+			socket.send(packet);
+			
+			Retransmitter trans = new Retransmitter(sequenceNumber, packet); 
+			timer.schedule(trans, TIMEOUT_MILLIS);
+			this.pendingYeahs.put(sequenceNumber, trans);
+		}
+	}
 
     public class Retransmitter extends TimerTask {
     	public static final int MAX_RETRIES = 5;

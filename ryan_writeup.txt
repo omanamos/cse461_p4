@@ -3,12 +3,10 @@ CSE 461 - Homework 4
 
 1
 ----------------
-
-
+One problem that would come with higher load on the network is that the network could become overloaded with GDAY messages, since they are sent the most often. This problem could be solved is by having all chat messages going through a cluster of "server nodes" that would be the ones that keep track of membership also. This way, the some of the load is transfered from the network to the cluster of "server nodes", which could just be a randomly chosen set of the chat clients.
 
 2
 -----------------
-
 
 
 Textbook Problems
@@ -16,7 +14,7 @@ Textbook Problems
 
 5.18
 -----------------
-Maximum data rate = 228.89 MB/s
+Maximum data rate = 76.8 Mbps
 
 5.22
 ----------------
@@ -24,11 +22,11 @@ There is not a guarantee, but there is a high likelihood. Hosts are policed on h
 
 6.14
 ---------------
-AIAD does not converge quickly, but it is very stable. It does not converge very quickly because neither host gives up more bandwidth during decrease than it takes during and increase. In other words, this will keep the network running at a good efficiency (and is stable), but not necessarily fair.
+AIAD does not converge, but it is very stable. It does not converge because neither host gives up more bandwidth during decrease than it takes during and increase. In other words, this will keep the network running at a good efficiency (and is stable), but not necessarily fair.
 
-MIAD 
+MIAD does not converge, it diverges from a fair equilibrium. It is not stable, because it will be constantly moving futher from the fair equilibrium.
 
-MIMD has the same characteristics of AIAD. Since the same mathematical function is used for increaseing and decreasing the convergence is slow but the stability is high.
+MIMD has the same characteristics of AIAD. Since the same mathematical function is used for increaseing and decreasing it does not converge but the stability is high.
 
 
 7.7
